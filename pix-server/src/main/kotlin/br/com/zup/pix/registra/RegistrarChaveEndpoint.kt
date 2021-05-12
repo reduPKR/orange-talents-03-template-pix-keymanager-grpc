@@ -21,11 +21,21 @@ class RegistrarChaveEndpoint(@Inject private val service: ChavePixService)
 
         val chavePixRequest = request.toModel()
         try {
-            service.registrar(chavePixRequest)
+            val chave = service.registrar(chavePixRequest)
+
+            responseObserver.onNext(ChaveRegistradaResponse
+                .newBuilder()
+                .setPixId(chave.id!!.toString())
+                .setClienteId(chave.clienteId.toString())
+                .build())
+
         }catch (e: ChavePixExistenteException){
             catchChaveJaCadastrada(responseObserver, chavePixRequest)
         }catch (e: ClienteNaoEncontradoException){
             catchClienteNaoEncontrado(responseObserver)
+        }finally {
+            responseObserver.onCompleted()
+            return
         }
     }
 
@@ -35,8 +45,6 @@ class RegistrarChaveEndpoint(@Inject private val service: ChavePixService)
                 .withDescription("Cliente não encontrado no sistema do Itau")
                 .asRuntimeException()
         )
-
-        responseObserver.onCompleted()
     }
 
     private fun catchChaveJaCadastrada(
@@ -48,7 +56,5 @@ class RegistrarChaveEndpoint(@Inject private val service: ChavePixService)
                 .withDescription("Chave: ${chavePixRequest.chave} já foi cadastrada")
                 .asRuntimeException()
         )
-
-        responseObserver.onCompleted()
     }
 }
