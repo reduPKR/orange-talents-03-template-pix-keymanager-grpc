@@ -16,7 +16,7 @@ class RegistrarChaveEndpoint(@Inject private val service: ChavePixService)
     ) {
 
         val chavePixRequest = request.toModel()
-        service.registrar(chavePixRequest)
+        service.registrar(chavePixRequest, responseObserver)
 
 
     }

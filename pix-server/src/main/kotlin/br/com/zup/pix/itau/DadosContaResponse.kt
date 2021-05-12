@@ -7,5 +7,13 @@ class DadosContaResponse(
     val numero: String,
     val titular: TitularResponse,
 ) {
-
+    fun toModel(): ContaAssociada {
+        return ContaAssociada(
+            this.instituicao.nome,
+            this.titular.nome,
+            this.titular.cpf,
+            this.agencia,
+            this.numero
+        )
+    }
 }

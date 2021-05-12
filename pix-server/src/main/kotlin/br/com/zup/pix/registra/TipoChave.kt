@@ -5,5 +5,5 @@ enum class TipoChave {
     CPF,
     CELULAR,
     EMAIL,
-    ALEATORIA
+    ALEATORIA;
 }

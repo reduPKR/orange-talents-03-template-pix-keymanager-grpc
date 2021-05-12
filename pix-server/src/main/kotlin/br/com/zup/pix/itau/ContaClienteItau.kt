@@ -9,5 +9,5 @@ import java.net.http.HttpResponse
 @Client("\${itau.contas.url}")
 interface ContaClienteItau {
     @Get("/api/v1/clientes/{clienteId}/contas{?tipo}")
-    fun BuscarContaPorTipo(@PathVariable clienteId: String, @QueryValue tipo: String): HttpResponse<DadosContaResponse>
+    fun buscarContaPorTipo(@PathVariable clienteId: String, @QueryValue tipo: String): HttpResponse<DadosContaResponse>
 }
