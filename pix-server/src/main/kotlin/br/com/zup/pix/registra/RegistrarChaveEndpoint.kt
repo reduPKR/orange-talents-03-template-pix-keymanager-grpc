@@ -3,7 +3,11 @@ package br.com.zup.pix.registra
 import br.com.zup.pix.ChaveRegistradaResponse
 import br.com.zup.pix.PixServerServiceGrpc
 import br.com.zup.pix.RegistrarChaveRequest
+import br.com.zup.pix.exception.ChavePixExistenteException
+import br.com.zup.pix.exception.ClienteNaoEncontradoException
+import io.grpc.Status
 import io.grpc.stub.StreamObserver
+import java.lang.IllegalStateException
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -16,8 +20,35 @@ class RegistrarChaveEndpoint(@Inject private val service: ChavePixService)
     ) {
 
         val chavePixRequest = request.toModel()
-        service.registrar(chavePixRequest, responseObserver)
+        try {
+            service.registrar(chavePixRequest)
+        }catch (e: ChavePixExistenteException){
+            catchChaveJaCadastrada(responseObserver, chavePixRequest)
+        }catch (e: ClienteNaoEncontradoException){
+            catchClienteNaoEncontrado(responseObserver)
+        }
+    }
 
+    private fun catchClienteNaoEncontrado(responseObserver: StreamObserver<ChaveRegistradaResponse>) {
+        responseObserver.onError(
+            Status.NOT_FOUND
+                .withDescription("Cliente não encontrado no sistema do Itau")
+                .asRuntimeException()
+        )
 
+        responseObserver.onCompleted()
+    }
+
+    private fun catchChaveJaCadastrada(
+        responseObserver: StreamObserver<ChaveRegistradaResponse>,
+        chavePixRequest: ChavePixRequest
+    ) {
+        responseObserver.onError(
+            Status.ALREADY_EXISTS
+                .withDescription("Chave: ${chavePixRequest.chave} já foi cadastrada")
+                .asRuntimeException()
+        )
+
+        responseObserver.onCompleted()
     }
 }

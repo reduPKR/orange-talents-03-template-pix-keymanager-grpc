@@ -1,9 +1,9 @@
 package br.com.zup.pix.registra
 
-import br.com.zup.pix.ChaveRegistradaResponse
+import br.com.zup.pix.exception.ChavePixExistenteException
+import br.com.zup.pix.exception.ClienteNaoEncontradoException
 import br.com.zup.pix.itau.ContaClienteItau
-import io.grpc.Status
-import io.grpc.stub.StreamObserver
+import java.lang.IllegalStateException
 import javax.inject.Inject
 import javax.transaction.Transactional
 import javax.validation.Valid
@@ -14,27 +14,15 @@ class ChavePixService(
 ) {
 
     @Transactional
-    fun registrar(@Valid chavePixRequest: ChavePixRequest, responseObserver: StreamObserver<ChaveRegistradaResponse>): ChavePix {
+    fun registrar(@Valid chavePixRequest: ChavePixRequest): ChavePix {
 
         if (repository.existsByChave(chavePixRequest.chave)){
-            responseObserver.onError(
-                Status.ALREADY_EXISTS
-                .withDescription("Chave: ${chavePixRequest.chave} já foi cadastrada")
-                .asRuntimeException())
-
-            responseObserver.onCompleted()
+            throw ChavePixExistenteException("Chave: ${chavePixRequest.chave} já foi cadastrada")
         }
 
         val response = itauClient.buscarContaPorTipo(chavePixRequest.clienteId!!, chavePixRequest.tipoConta!!.name)
         val conta = response.body()?.toModel()
-            ?: {
-                responseObserver.onError(
-                    Status.NOT_FOUND
-                        .withDescription("Cliente não encontrado no sistema do Itau")
-                        .asRuntimeException())
-
-                responseObserver.onCompleted()
-            }
+            ?: throw ClienteNaoEncontradoException("Cliente não encontrado")
 
         val chave = chavePixRequest.toModel(conta)
         repository.save(chave)
