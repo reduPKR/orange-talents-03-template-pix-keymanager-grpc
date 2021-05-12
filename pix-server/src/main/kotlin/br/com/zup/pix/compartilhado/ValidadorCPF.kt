@@ -16,19 +16,16 @@ class ValidadorCPF(val chave: String) {
     }
 
     private fun calcularDigito(cpf: String, pesoAux: Int): Int {
-        var valor = 0
-        var resto = 0
         var soma = 0
         var peso = pesoAux
         val limite = pesoAux -2
 
         for (i in 0..limite) {
-            valor = ((cpf.get(i) - 48).toInt())
-            soma += (valor * peso)
+            soma += (((cpf.get(i) - 48).toInt()) * peso)
             peso--
         }
 
-        resto = 11 - (soma % 11)
+        var resto = 11 - (soma % 11)
         if (resto == 10 || resto == 11)
             return 0
         return resto

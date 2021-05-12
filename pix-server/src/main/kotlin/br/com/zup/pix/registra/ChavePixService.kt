@@ -3,11 +3,15 @@ package br.com.zup.pix.registra
 import br.com.zup.pix.exception.ChavePixExistenteException
 import br.com.zup.pix.exception.ClienteNaoEncontradoException
 import br.com.zup.pix.itau.ContaClienteItau
+import io.micronaut.validation.Validated
 import java.lang.IllegalStateException
 import javax.inject.Inject
+import javax.inject.Singleton
 import javax.transaction.Transactional
 import javax.validation.Valid
 
+@Singleton
+@Validated
 class ChavePixService(
     @Inject val repository: ChavePixRepository,
     @Inject val itauClient: ContaClienteItau

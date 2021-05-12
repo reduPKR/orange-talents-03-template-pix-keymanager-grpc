@@ -1,6 +1,6 @@
 package br.com.zup.pix.itau
 
-class DadosContaResponse(
+data class DadosContaResponse(
     val tipo: String,
     val instituicao: InstituicaoResponse,
     val agencia: String,
