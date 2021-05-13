@@ -28,15 +28,25 @@ class RegistrarChaveEndpoint(@Inject private val service: ChavePixService)
                 .setPixId(chave.id!!.toString())
                 .setClienteId(chave.clienteId.toString())
                 .build())
-
+            responseObserver.onCompleted()
         }catch (e: ChavePixExistenteException){
             catchChaveJaCadastrada(responseObserver, chavePixRequest)
+            return
         }catch (e: ClienteNaoEncontradoException){
             catchClienteNaoEncontrado(responseObserver)
-        }finally {
-            responseObserver.onCompleted()
+            return
+        }catch (e: Exception){
+            argumentosInvalidos(responseObserver)
             return
         }
+    }
+
+    private fun argumentosInvalidos(responseObserver: StreamObserver<ChaveRegistradaResponse>) {
+        responseObserver.onError(
+            Status.INVALID_ARGUMENT
+                .withDescription("Dados invalidos")
+                .asRuntimeException()
+        )
     }
 
     private fun catchClienteNaoEncontrado(responseObserver: StreamObserver<ChaveRegistradaResponse>) {
