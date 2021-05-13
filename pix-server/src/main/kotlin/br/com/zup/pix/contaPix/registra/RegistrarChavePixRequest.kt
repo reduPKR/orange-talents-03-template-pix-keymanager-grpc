@@ -14,7 +14,7 @@ import javax.validation.constraints.Size
 
 @ValidPixKey
 @Introspected
-class ChavePixRequest(
+class RegistrarChavePixRequest(
     @ValideUUID
     @field:NotBlank
     val clienteId: String?,

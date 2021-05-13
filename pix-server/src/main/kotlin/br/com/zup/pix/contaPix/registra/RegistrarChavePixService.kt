@@ -13,23 +13,23 @@ import javax.validation.Valid
 
 @Singleton
 @Validated
-class ChavePixService(
+class RegistrarChavePixService(
     @Inject val repository: ChavePixRepository,
     @Inject val itauClient: ContaClienteItau
 ) {
 
     @Transactional
-    fun registrar(@Valid chavePixRequest: ChavePixRequest): ChavePix {
+    fun registrar(@Valid registrarChavePixRequest: RegistrarChavePixRequest): ChavePix {
 
-        if (repository.existsByChave(chavePixRequest.chave)){
-            throw ChavePixExistenteException("Chave: ${chavePixRequest.chave} já foi cadastrada")
+        if (repository.existsByChave(registrarChavePixRequest.chave)){
+            throw ChavePixExistenteException("Chave: ${registrarChavePixRequest.chave} já foi cadastrada")
         }
 
-        val response = itauClient.buscarContaPorTipo(chavePixRequest.clienteId!!, chavePixRequest.tipoConta!!.name)
+        val response = itauClient.buscarContaPorTipo(registrarChavePixRequest.clienteId!!, registrarChavePixRequest.tipoConta!!.name)
         val conta = response.body()?.toModel()
             ?: throw ClienteNaoEncontradoException("Cliente não encontrado")
 
-        val chave = chavePixRequest.toModel(conta)
+        val chave = registrarChavePixRequest.toModel(conta)
         repository.save(chave)
         return chave
     }

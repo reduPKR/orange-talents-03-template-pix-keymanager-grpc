@@ -7,18 +7,16 @@ import br.com.zup.pix.exception.ChavePixExistenteException
 import br.com.zup.pix.exception.ClienteNaoEncontradoException
 import io.grpc.Status
 import io.grpc.stub.StreamObserver
-import java.lang.IllegalStateException
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class RegistrarChaveEndpoint(@Inject private val service: ChavePixService)
+class RegistrarChaveEndpoint(@Inject private val service: RegistrarChavePixService)
     : PixServerRegistrarServiceGrpc.PixServerRegistrarServiceImplBase(){
     override fun registrar(
         request: RegistrarChaveRequest,
         responseObserver: StreamObserver<ChaveRegistradaResponse>
     ) {
-
         val chavePixRequest = request.toModel()
         try {
             val chave = service.registrar(chavePixRequest)
@@ -59,11 +57,11 @@ class RegistrarChaveEndpoint(@Inject private val service: ChavePixService)
 
     private fun catchChaveJaCadastrada(
         responseObserver: StreamObserver<ChaveRegistradaResponse>,
-        chavePixRequest: ChavePixRequest
+        registrarChavePixRequest: RegistrarChavePixRequest
     ) {
         responseObserver.onError(
             Status.ALREADY_EXISTS
-                .withDescription("Chave: ${chavePixRequest.chave} já foi cadastrada")
+                .withDescription("Chave: ${registrarChavePixRequest.chave} já foi cadastrada")
                 .asRuntimeException()
         )
     }

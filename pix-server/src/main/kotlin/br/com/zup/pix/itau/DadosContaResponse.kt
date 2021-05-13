@@ -5,7 +5,7 @@ data class DadosContaResponse(
     val instituicao: InstituicaoResponse,
     val agencia: String,
     val numero: String,
-    val titular: TitularResponse,
+    val titular: TitularResponse
 ) {
     fun toModel(): ContaAssociada {
         return ContaAssociada(

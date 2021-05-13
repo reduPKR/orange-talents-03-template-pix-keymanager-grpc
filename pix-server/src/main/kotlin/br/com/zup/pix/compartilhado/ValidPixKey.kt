@@ -1,6 +1,6 @@
 package br.com.zup.pix.compartilhado
 
-import br.com.zup.pix.contaPix.registra.ChavePixRequest
+import br.com.zup.pix.contaPix.registra.RegistrarChavePixRequest
 import io.micronaut.core.annotation.AnnotationValue
 import io.micronaut.validation.validator.constraints.ConstraintValidator
 import io.micronaut.validation.validator.constraints.ConstraintValidatorContext
@@ -22,9 +22,9 @@ annotation class ValidPixKey(
 )
 
 @Singleton
-class ValidPixKeyValidator: ConstraintValidator<ValidPixKey, ChavePixRequest> {
+class ValidPixKeyValidator: ConstraintValidator<ValidPixKey, RegistrarChavePixRequest> {
     override fun isValid(
-        value: ChavePixRequest?,
+        value: RegistrarChavePixRequest?,
         annotationMetadata: AnnotationValue<ValidPixKey>,
         context: ConstraintValidatorContext?
     ): Boolean {
