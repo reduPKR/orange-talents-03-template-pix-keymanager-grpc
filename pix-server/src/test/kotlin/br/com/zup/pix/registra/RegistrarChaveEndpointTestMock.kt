@@ -5,6 +5,9 @@ import br.com.zup.pix.RegistrarChaveRequest
 import br.com.zup.pix.TipoChave
 import br.com.zup.pix.TipoConta
 import br.com.zup.pix.itau.ContaClienteItau
+import br.com.zup.pix.itau.DadosContaResponse
+import br.com.zup.pix.itau.InstituicaoResponse
+import br.com.zup.pix.itau.TitularResponse
 import io.grpc.ManagedChannel
 import io.grpc.Status
 import io.grpc.StatusRuntimeException
@@ -33,6 +36,77 @@ internal class RegistrarChaveEndpointTestMock(
     @BeforeEach
     fun setup(){
         repository.deleteAll()
+    }
+
+    @Test
+    fun `deve cadastrar uma nova chave`(){
+        val clienteId = "c56dfef4-7901-44fb-84e2-a2cefb157890"
+
+        val dadosConta = getDadosConta()
+        Mockito.`when`(itauClient.buscarContaPorTipo(clienteId, "CONTA_CORRENTE"))
+            .thenReturn(HttpResponse.ok(dadosConta))
+
+        val chaveRequest = RegistrarChaveRequest.newBuilder()
+            .setClienteId(clienteId)
+            .setTipoChave(TipoChave.valueOf("CPF"))
+            .setChave("02467781054")
+            .setTipoConta(TipoConta.valueOf("CONTA_CORRENTE"))
+            .build()
+
+        val chaveResponse = grpcClient.registrar(chaveRequest)
+
+        with(chaveResponse){
+            assertNotNull(pixId)
+            assertEquals("c56dfef4-7901-44fb-84e2-a2cefb157890", clienteId)
+        }
+    }
+
+    private fun getDadosConta(): DadosContaResponse {
+        val intituica = InstituicaoResponse(
+            "ITAÚ UNIBANCO S.A.",
+            "60701190"
+        )
+
+        val titularResponse = TitularResponse(
+            "c56dfef4-7901-44fb-84e2-a2cefb157890",
+            "Rafael M C Ponte",
+            "02467781054"
+        )
+
+        return DadosContaResponse(
+            "CONTA_CORRENTE",
+            intituica,
+            "0001",
+            "291900",
+            titularResponse
+        )
+    }
+
+    @Test
+    fun `nao deve cadastrar caso a chave ja foi cadastrada`(){
+        val clienteId = "c56dfef4-7901-44fb-84e2-a2cefb157890"
+        val chave = "02467781054"
+
+        val dadosConta = getDadosConta()
+        Mockito.`when`(itauClient.buscarContaPorTipo(clienteId, "CONTA_CORRENTE"))
+            .thenReturn(HttpResponse.ok(dadosConta))
+
+        val chaveRequest = RegistrarChaveRequest.newBuilder()
+            .setClienteId(clienteId)
+            .setTipoChave(TipoChave.valueOf("CPF"))
+            .setChave(chave)
+            .setTipoConta(TipoConta.valueOf("CONTA_CORRENTE"))
+            .build()
+
+        grpcClient.registrar(chaveRequest)
+        val error = assertThrows<StatusRuntimeException>{
+            grpcClient.registrar(chaveRequest)
+        }
+
+        with(error){
+            assertEquals(Status.ALREADY_EXISTS.code, status.code)
+            assertEquals("Chave: $chave já foi cadastrada", status.description)
+        }
     }
 
     @Test
