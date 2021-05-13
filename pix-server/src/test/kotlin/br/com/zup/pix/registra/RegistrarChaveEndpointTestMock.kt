@@ -1,9 +1,7 @@
 package br.com.zup.pix.registra
 
-import br.com.zup.pix.PixServerServiceGrpc
-import br.com.zup.pix.RegistrarChaveRequest
-import br.com.zup.pix.TipoChave
-import br.com.zup.pix.TipoConta
+import br.com.zup.pix.*
+import br.com.zup.pix.contaPix.ChavePixRepository
 import br.com.zup.pix.itau.ContaClienteItau
 import br.com.zup.pix.itau.DadosContaResponse
 import br.com.zup.pix.itau.InstituicaoResponse
@@ -28,7 +26,7 @@ import javax.inject.Singleton
 @MicronautTest
 internal class RegistrarChaveEndpointTestMock(
     val repository: ChavePixRepository,
-    val grpcClient: PixServerServiceGrpc.PixServerServiceBlockingStub
+    val grpcClient: PixServerRegistrarServiceGrpc.PixServerRegistrarServiceBlockingStub
 ){
     @Inject
     lateinit var itauClient: ContaClienteItau
@@ -141,8 +139,8 @@ internal class RegistrarChaveEndpointTestMock(
     @Factory
     class Clients{
         @Singleton
-        fun blockingStub(@GrpcChannel(GrpcServerChannel.NAME) channel: ManagedChannel): PixServerServiceGrpc.PixServerServiceBlockingStub?{
-            return PixServerServiceGrpc.newBlockingStub(channel)
+        fun blockingStub(@GrpcChannel(GrpcServerChannel.NAME) channel: ManagedChannel): PixServerRegistrarServiceGrpc.PixServerRegistrarServiceBlockingStub?{
+            return PixServerRegistrarServiceGrpc.newBlockingStub(channel)
         }
     }
 }

@@ -1,7 +1,6 @@
 package br.com.zup.pix.compartilhado
 
-import br.com.zup.pix.registra.ChavePixRequest
-import br.com.zup.pix.registra.TipoChave
+import br.com.zup.pix.contaPix.registra.ChavePixRequest
 import io.micronaut.core.annotation.AnnotationValue
 import io.micronaut.validation.validator.constraints.ConstraintValidator
 import io.micronaut.validation.validator.constraints.ConstraintValidatorContext

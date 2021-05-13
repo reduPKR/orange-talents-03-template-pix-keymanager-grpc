@@ -7,8 +7,22 @@ option objc_class_prefix = "HLW";
 
 package br.com.zup.pix;
 
-service PixServerService {
+service PixServerRegistrarService {
   rpc registrar(RegistrarChaveRequest) returns (ChaveRegistradaResponse){}
+}
+
+service PixServerRemoveService {
+  rpc remover(RemoverChaveRequest) returns (RemoverChaveResponse){}
+}
+
+message RemoverChaveRequest{
+  string clienteId = 1;
+  string pixId = 2;
+}
+
+message RemoverChaveResponse{
+  string clienteId = 1;
+  string pixId = 2;
 }
 
 message RegistrarChaveRequest{

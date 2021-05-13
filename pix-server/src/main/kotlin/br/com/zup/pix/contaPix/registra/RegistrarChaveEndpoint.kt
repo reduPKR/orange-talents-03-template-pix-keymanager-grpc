@@ -1,7 +1,7 @@
-package br.com.zup.pix.registra
+package br.com.zup.pix.contaPix.registra
 
 import br.com.zup.pix.ChaveRegistradaResponse
-import br.com.zup.pix.PixServerServiceGrpc
+import br.com.zup.pix.PixServerRegistrarServiceGrpc
 import br.com.zup.pix.RegistrarChaveRequest
 import br.com.zup.pix.exception.ChavePixExistenteException
 import br.com.zup.pix.exception.ClienteNaoEncontradoException
@@ -13,7 +13,7 @@ import javax.inject.Singleton
 
 @Singleton
 class RegistrarChaveEndpoint(@Inject private val service: ChavePixService)
-    : PixServerServiceGrpc.PixServerServiceImplBase(){
+    : PixServerRegistrarServiceGrpc.PixServerRegistrarServiceImplBase(){
     override fun registrar(
         request: RegistrarChaveRequest,
         responseObserver: StreamObserver<ChaveRegistradaResponse>

@@ -1,4 +1,4 @@
-package br.com.zup.pix.registra
+package br.com.zup.pix.contaPix
 
 import br.com.zup.pix.compartilhado.ValidadorCPF
 import br.com.zup.pix.compartilhado.ValidadorEmail

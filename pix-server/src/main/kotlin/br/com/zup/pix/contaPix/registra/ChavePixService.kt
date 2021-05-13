@@ -1,10 +1,11 @@
-package br.com.zup.pix.registra
+package br.com.zup.pix.contaPix.registra
 
+import br.com.zup.pix.contaPix.ChavePix
+import br.com.zup.pix.contaPix.ChavePixRepository
 import br.com.zup.pix.exception.ChavePixExistenteException
 import br.com.zup.pix.exception.ClienteNaoEncontradoException
 import br.com.zup.pix.itau.ContaClienteItau
 import io.micronaut.validation.Validated
-import java.lang.IllegalStateException
 import javax.inject.Inject
 import javax.inject.Singleton
 import javax.transaction.Transactional
