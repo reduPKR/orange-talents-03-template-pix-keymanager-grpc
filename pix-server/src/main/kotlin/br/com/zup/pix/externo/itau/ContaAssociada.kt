@@ -13,5 +13,6 @@ class ContaAssociada(
 ) {
     companion object{
         val ITAU_UNIBANCO_ISPB = "60701190"
+        val ITAU_UNIBANCO_NOME = "ITAÚ UNIBANCO S.A."
     }
 }

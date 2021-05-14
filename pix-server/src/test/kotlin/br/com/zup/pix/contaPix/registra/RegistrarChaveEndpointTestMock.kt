@@ -1,11 +1,10 @@
 package br.com.zup.pix.contaPix.registra
 
 import br.com.zup.pix.*
+import br.com.zup.pix.contaPix.ChavePix
 import br.com.zup.pix.contaPix.ChavePixRepository
-import br.com.zup.pix.externo.itau.ContaClienteItau
-import br.com.zup.pix.externo.itau.DadosContaResponse
-import br.com.zup.pix.externo.itau.InstituicaoResponse
-import br.com.zup.pix.externo.itau.TitularResponse
+import br.com.zup.pix.externo.bancoCentral.*
+import br.com.zup.pix.externo.itau.*
 import io.grpc.ManagedChannel
 import io.grpc.Status
 import io.grpc.StatusRuntimeException
@@ -27,22 +26,30 @@ import javax.inject.Singleton
 internal class RegistrarChaveEndpointTestMock(
     val repository: ChavePixRepository,
     val grpcClient: PixServerRegistrarServiceGrpc.PixServerRegistrarServiceBlockingStub
-){
+) {
     @Inject
     lateinit var itauClient: ContaClienteItau
 
+    @Inject
+    lateinit var bcCliente: BancoCentralCliente
+
     @BeforeEach
-    fun setup(){
+    fun setup() {
         repository.deleteAll()
     }
 
     @Test
-    fun `deve cadastrar uma nova chave`(){
+    fun `deve cadastrar uma nova chave`() {
         val clienteId = "c56dfef4-7901-44fb-84e2-a2cefb157890"
 
         val dadosConta = getDadosConta()
         Mockito.`when`(itauClient.buscarContaPorTipo(clienteId, "CONTA_CORRENTE"))
             .thenReturn(HttpResponse.ok(dadosConta))
+        Mockito.`when`(
+            bcCliente.cadastrar(
+                criarRequestBancoCentral(dadosConta)
+            )
+        )
 
         val chaveRequest = RegistrarChaveRequest.newBuilder()
             .setClienteId(clienteId)
@@ -53,10 +60,28 @@ internal class RegistrarChaveEndpointTestMock(
 
         val chaveResponse = grpcClient.registrar(chaveRequest)
 
-        with(chaveResponse){
+        with(chaveResponse) {
             assertNotNull(pixId)
             assertEquals("c56dfef4-7901-44fb-84e2-a2cefb157890", clienteId)
         }
+    }
+
+    private fun criarRequestBancoCentral(dadosConta: DadosContaResponse): CreatePixKeyRequest {
+        return CreatePixKeyRequest(
+            KeyType.CPF,
+            "02467781054",
+            BankAccountRequest(
+                ContaAssociada.ITAU_UNIBANCO_ISPB,
+                dadosConta.agencia,
+                dadosConta.numero,
+                BankAccountRequest.AccountType.CACC
+            ),
+            OwnerRequest(
+                OwnerType.NATURAL_PERSON,
+                dadosConta.titular.nome,
+                dadosConta.titular.cpf
+            )
+        )
     }
 
     private fun getDadosConta(): DadosContaResponse {
@@ -81,7 +106,7 @@ internal class RegistrarChaveEndpointTestMock(
     }
 
     @Test
-    fun `nao deve cadastrar caso a chave ja foi cadastrada`(){
+    fun `nao deve cadastrar caso a chave ja foi cadastrada`() {
         val clienteId = "c56dfef4-7901-44fb-84e2-a2cefb157890"
         val chave = "02467781054"
 
@@ -97,18 +122,18 @@ internal class RegistrarChaveEndpointTestMock(
             .build()
 
         grpcClient.registrar(chaveRequest)
-        val error = assertThrows<StatusRuntimeException>{
+        val error = assertThrows<StatusRuntimeException> {
             grpcClient.registrar(chaveRequest)
         }
 
-        with(error){
+        with(error) {
             assertEquals(Status.ALREADY_EXISTS.code, status.code)
             assertEquals("Chave: $chave já foi cadastrada", status.description)
         }
     }
 
     @Test
-    fun `nao deve cadastrar caso o cliente nao seja encontrado no sistema do itau`(){
+    fun `nao deve cadastrar caso o cliente nao seja encontrado no sistema do itau`() {
         val clienteId = "c56dfef4-7901-44fb-84e2-a2cefb157890"
 
         Mockito.`when`(itauClient.buscarContaPorTipo(clienteId, "CONTA_CORRENTE"))
@@ -121,11 +146,11 @@ internal class RegistrarChaveEndpointTestMock(
             .setTipoConta(TipoConta.valueOf("CONTA_CORRENTE"))
             .build()
 
-        val error = assertThrows<StatusRuntimeException>{
+        val error = assertThrows<StatusRuntimeException> {
             grpcClient.registrar(chaveRequest)
         }
 
-        with(error){
+        with(error) {
             assertEquals(Status.NOT_FOUND.code, status.code)
             assertEquals("Cliente não encontrado no sistema do Itau", status.description)
         }
@@ -136,11 +161,16 @@ internal class RegistrarChaveEndpointTestMock(
         return Mockito.mock(ContaClienteItau::class.java)
     }
 
+    @MockBean(BancoCentralCliente::class)
+    fun bancoCentralMock(): BancoCentralCliente {
+        return Mockito.mock(BancoCentralCliente::class.java)
+    }
+
     @Factory
-    class Clients{
+    class Clients {
         @Singleton
         fun blockingStub(@GrpcChannel(GrpcServerChannel.NAME) channel: ManagedChannel)
-        : PixServerRegistrarServiceGrpc.PixServerRegistrarServiceBlockingStub?{
+                : PixServerRegistrarServiceGrpc.PixServerRegistrarServiceBlockingStub? {
             return PixServerRegistrarServiceGrpc.newBlockingStub(channel)
         }
     }

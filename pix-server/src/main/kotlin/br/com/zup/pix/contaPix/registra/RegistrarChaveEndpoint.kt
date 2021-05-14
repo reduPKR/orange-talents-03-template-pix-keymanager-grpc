@@ -6,6 +6,7 @@ import br.com.zup.pix.RegistrarChaveRequest
 import br.com.zup.pix.contaPix.ChavePix
 import br.com.zup.pix.exception.ChavePixExistenteException
 import br.com.zup.pix.exception.ClienteNaoEncontradoException
+import br.com.zup.pix.exception.ErroBancoCentralException
 import io.grpc.Status
 import io.grpc.stub.StreamObserver
 import javax.inject.Inject
@@ -26,9 +27,20 @@ class RegistrarChaveEndpoint(@Inject private val service: RegistrarChavePixServi
             catchChaveJaCadastrada(responseObserver, chavePixRequest)
         }catch (e: ClienteNaoEncontradoException){
             catchClienteNaoEncontrado(responseObserver)
-        }catch (e: Exception){
+        }catch(e: ErroBancoCentralException){
+            catchErroComBancoCentral(responseObserver)
+        }
+        catch (e: Exception){
             catchArgumentosInvalidos(responseObserver)
         }
+    }
+
+    private fun catchErroComBancoCentral(responseObserver: StreamObserver<ChaveRegistradaResponse>) {
+        responseObserver.onError(
+            Status.INTERNAL
+                .withDescription("Erro na comunicação com banco central")
+                .asRuntimeException()
+        )
     }
 
     private fun respostaChaveRegistrada(
