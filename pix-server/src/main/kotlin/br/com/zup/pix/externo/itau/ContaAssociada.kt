@@ -11,5 +11,7 @@ class ContaAssociada(
     val agencia: String,
     val numeroConta: String
 ) {
-
+    companion object{
+        val ITAU_UNIBANCO_ISPB = "60701190"
+    }
 }

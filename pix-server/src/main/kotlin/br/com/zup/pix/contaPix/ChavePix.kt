@@ -1,7 +1,5 @@
 package br.com.zup.pix.contaPix
 
-import br.com.zup.pix.contaPix.TipoChave
-import br.com.zup.pix.contaPix.TipoConta
 import br.com.zup.pix.externo.itau.ContaAssociada
 import java.time.LocalDateTime
 import java.util.*

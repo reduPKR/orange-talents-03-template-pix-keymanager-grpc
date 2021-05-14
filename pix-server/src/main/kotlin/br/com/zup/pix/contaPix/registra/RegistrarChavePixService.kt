@@ -4,6 +4,8 @@ import br.com.zup.pix.contaPix.ChavePix
 import br.com.zup.pix.contaPix.ChavePixRepository
 import br.com.zup.pix.exception.ChavePixExistenteException
 import br.com.zup.pix.exception.ClienteNaoEncontradoException
+import br.com.zup.pix.externo.bancoCentral.BancoCentralCliente
+import br.com.zup.pix.externo.bancoCentral.CreatePixKeyRequest
 import br.com.zup.pix.externo.itau.ContaClienteItau
 import io.micronaut.validation.Validated
 import javax.inject.Inject
@@ -15,7 +17,8 @@ import javax.validation.Valid
 @Validated
 class RegistrarChavePixService(
     @Inject val repository: ChavePixRepository,
-    @Inject val itauClient: ContaClienteItau
+    @Inject val itauClient: ContaClienteItau,
+    @Inject val bcClient: BancoCentralCliente
 ) {
 
     @Transactional
@@ -31,6 +34,10 @@ class RegistrarChavePixService(
 
         val chave = registrarChavePixRequest.toModel(conta)
         repository.save(chave)
+
+        /*Etapa nova*/
+        val bcRequest = CreatePixKeyRequest.converter(chave)
+
         return chave
     }
 
