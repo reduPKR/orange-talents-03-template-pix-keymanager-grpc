@@ -46,6 +46,7 @@ dependencies {
 
     // https://mvnrepository.com/artifact/io.micronaut/micronaut-http-client
     implementation("io.micronaut:micronaut-http-client:2.5.1")
+    implementation("io.micronaut.xml:micronaut-jackson-xml")
 }
 
 

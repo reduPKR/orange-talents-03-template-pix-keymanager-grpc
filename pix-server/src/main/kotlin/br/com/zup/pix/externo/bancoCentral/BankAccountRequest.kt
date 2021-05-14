@@ -3,11 +3,11 @@ package br.com.zup.pix.externo.bancoCentral
 import br.com.zup.pix.contaPix.TipoConta
 
 
-class BankAccountRequest(
-    participant: String,
-    branch:	String,
-    accountNumber: String,
-    accountType: AccountType
+data class BankAccountRequest(
+    val participant: String,
+    val branch:	String,
+    val accountNumber: String,
+    val accountType: AccountType
 ) {
     enum class AccountType {
         CACC,

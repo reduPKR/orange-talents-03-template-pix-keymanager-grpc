@@ -1,9 +1,9 @@
 package br.com.zup.pix.externo.bancoCentral
 
-class OwnerResponse(
-    type: OwnerType,
-    name: String,
-    taxIdNumber: String
+data class OwnerResponse(
+    val type: OwnerType,
+    val name: String,
+    val taxIdNumber: String
 ) {
 
 }

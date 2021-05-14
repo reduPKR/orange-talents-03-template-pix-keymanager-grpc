@@ -4,9 +4,11 @@ import br.com.zup.pix.contaPix.ChavePix
 import br.com.zup.pix.contaPix.ChavePixRepository
 import br.com.zup.pix.exception.ChavePixExistenteException
 import br.com.zup.pix.exception.ClienteNaoEncontradoException
+import br.com.zup.pix.exception.ErroBancoCentralException
 import br.com.zup.pix.externo.bancoCentral.BancoCentralCliente
 import br.com.zup.pix.externo.bancoCentral.CreatePixKeyRequest
 import br.com.zup.pix.externo.itau.ContaClienteItau
+import io.micronaut.http.HttpStatus
 import io.micronaut.validation.Validated
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -37,7 +39,11 @@ class RegistrarChavePixService(
 
         /*Etapa nova*/
         val bcRequest = CreatePixKeyRequest.converter(chave)
+        val bcResponse = bcClient.cadastrar(bcRequest)
+        if(bcResponse.status != HttpStatus.CREATED)
+            throw ErroBancoCentralException()
 
+        chave.atualiza(bcResponse.body()!!.key)
         return chave
     }
 

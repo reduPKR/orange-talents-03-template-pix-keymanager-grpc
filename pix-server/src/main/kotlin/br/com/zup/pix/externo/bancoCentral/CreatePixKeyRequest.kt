@@ -4,7 +4,7 @@ import br.com.zup.pix.contaPix.ChavePix
 import br.com.zup.pix.externo.bancoCentral.CreatePixKeyRequest.Companion.converter
 import br.com.zup.pix.externo.itau.ContaAssociada
 
-class CreatePixKeyRequest(
+data class CreatePixKeyRequest(
     val keyType: KeyType,
     val key: String,
     val bankAccount: BankAccountRequest,
@@ -21,7 +21,11 @@ class CreatePixKeyRequest(
                     chave.conta.numeroConta,
                     BankAccountRequest.AccountType.converter(chave.tipoConta)
                 ),
-                OwnerRequest()
+                OwnerRequest(
+                    OwnerType.NATURAL_PERSON,
+                    chave.conta.nomeTitular,
+                    chave.conta.cpfTitular
+                )
             )
         }
     }

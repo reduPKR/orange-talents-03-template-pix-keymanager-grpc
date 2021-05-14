@@ -1,8 +1,8 @@
 package br.com.zup.pix.externo.bancoCentral
 
-class OwnerRequest (
-    type: OwnerType,
-    name: String,
-    taxIdNumber: String
+data class OwnerRequest (
+    val type: OwnerType,
+    val name: String,
+    val taxIdNumber: String
     )
 {}

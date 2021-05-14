@@ -20,7 +20,7 @@ class ChavePix(
 
     @field:NotNull
     @Column(nullable = false)
-    val chave: String,
+    var chave: String,
 
     @field:NotNull
     @Column(nullable = false)
@@ -37,4 +37,8 @@ class ChavePix(
 
     @Column(nullable = false)
     val criadaEm: LocalDateTime = LocalDateTime.now()
+
+    fun atualiza(key: String) {
+        this.chave = key
+    }
 }
