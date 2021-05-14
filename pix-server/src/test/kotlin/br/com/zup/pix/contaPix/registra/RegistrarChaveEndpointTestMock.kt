@@ -2,10 +2,10 @@ package br.com.zup.pix.contaPix.registra
 
 import br.com.zup.pix.*
 import br.com.zup.pix.contaPix.ChavePixRepository
-import br.com.zup.pix.itau.ContaClienteItau
-import br.com.zup.pix.itau.DadosContaResponse
-import br.com.zup.pix.itau.InstituicaoResponse
-import br.com.zup.pix.itau.TitularResponse
+import br.com.zup.pix.externo.itau.ContaClienteItau
+import br.com.zup.pix.externo.itau.DadosContaResponse
+import br.com.zup.pix.externo.itau.InstituicaoResponse
+import br.com.zup.pix.externo.itau.TitularResponse
 import io.grpc.ManagedChannel
 import io.grpc.Status
 import io.grpc.StatusRuntimeException
@@ -132,7 +132,7 @@ internal class RegistrarChaveEndpointTestMock(
     }
 
     @MockBean(ContaClienteItau::class)
-    fun itauMock(): ContaClienteItau{
+    fun itauMock(): ContaClienteItau {
         return Mockito.mock(ContaClienteItau::class.java)
     }
 

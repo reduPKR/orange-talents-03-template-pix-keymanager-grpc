@@ -19,3 +19,4 @@ grpc:
     max_inbound-message-size: 1024
 
 itau.contas.url: 'http://localhost:9091'
+bcb.contas.url: 'http://localhost:8082'

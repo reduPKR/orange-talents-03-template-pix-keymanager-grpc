@@ -5,7 +5,7 @@ import br.com.zup.pix.exception.ChavePixNaoExisteException
 import br.com.zup.pix.exception.ChavePixNaoPertenceAoCliente
 import br.com.zup.pix.exception.ClienteNaoEncontradoException
 import br.com.zup.pix.exception.ErroAoRetornarChavePixException
-import br.com.zup.pix.itau.ContaClienteItau
+import br.com.zup.pix.externo.itau.ContaClienteItau
 import io.micronaut.validation.Validated
 import java.util.*
 import javax.inject.Inject

@@ -1,4 +1,4 @@
-package br.com.zup.pix.itau
+package br.com.zup.pix.externo.itau
 
 import javax.persistence.Embeddable
 

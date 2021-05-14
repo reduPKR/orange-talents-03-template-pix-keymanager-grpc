@@ -1,4 +1,4 @@
-package br.com.zup.pix.itau
+package br.com.zup.pix.externo.itau
 
 class DadosClienteResponse(
     val id: String,

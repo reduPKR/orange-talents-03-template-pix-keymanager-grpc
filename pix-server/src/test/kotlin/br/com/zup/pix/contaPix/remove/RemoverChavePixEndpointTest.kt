@@ -5,7 +5,10 @@ import br.com.zup.pix.contaPix.ChavePix
 import br.com.zup.pix.contaPix.ChavePixRepository
 import br.com.zup.pix.contaPix.TipoChave
 import br.com.zup.pix.contaPix.TipoConta
-import br.com.zup.pix.itau.*
+import br.com.zup.pix.externo.itau.ContaAssociada
+import br.com.zup.pix.externo.itau.ContaClienteItau
+import br.com.zup.pix.externo.itau.DadosClienteResponse
+import br.com.zup.pix.externo.itau.InstituicaoResponse
 import io.grpc.ManagedChannel
 import io.grpc.Status
 import io.grpc.StatusRuntimeException

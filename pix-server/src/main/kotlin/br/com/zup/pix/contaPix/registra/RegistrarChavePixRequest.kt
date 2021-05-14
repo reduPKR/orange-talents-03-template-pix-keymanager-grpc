@@ -5,7 +5,7 @@ import br.com.zup.pix.compartilhado.ValideUUID
 import br.com.zup.pix.contaPix.ChavePix
 import br.com.zup.pix.contaPix.TipoChave
 import br.com.zup.pix.contaPix.TipoConta
-import br.com.zup.pix.itau.ContaAssociada
+import br.com.zup.pix.externo.itau.ContaAssociada
 import io.micronaut.core.annotation.Introspected
 import java.util.*
 import javax.validation.constraints.NotBlank
