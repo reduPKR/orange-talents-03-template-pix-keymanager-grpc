@@ -1,4 +1,4 @@
-package br.com.zup.pix.registra
+package br.com.zup.pix.contaPix.registra
 
 import br.com.zup.pix.contaPix.TipoChave
 import org.junit.jupiter.api.Assertions.*

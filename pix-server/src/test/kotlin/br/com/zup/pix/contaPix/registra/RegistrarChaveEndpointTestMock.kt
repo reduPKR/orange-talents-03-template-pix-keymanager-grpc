@@ -1,4 +1,4 @@
-package br.com.zup.pix.registra
+package br.com.zup.pix.contaPix.registra
 
 import br.com.zup.pix.*
 import br.com.zup.pix.contaPix.ChavePixRepository
@@ -139,7 +139,8 @@ internal class RegistrarChaveEndpointTestMock(
     @Factory
     class Clients{
         @Singleton
-        fun blockingStub(@GrpcChannel(GrpcServerChannel.NAME) channel: ManagedChannel): PixServerRegistrarServiceGrpc.PixServerRegistrarServiceBlockingStub?{
+        fun blockingStub(@GrpcChannel(GrpcServerChannel.NAME) channel: ManagedChannel)
+        : PixServerRegistrarServiceGrpc.PixServerRegistrarServiceBlockingStub?{
             return PixServerRegistrarServiceGrpc.newBlockingStub(channel)
         }
     }
