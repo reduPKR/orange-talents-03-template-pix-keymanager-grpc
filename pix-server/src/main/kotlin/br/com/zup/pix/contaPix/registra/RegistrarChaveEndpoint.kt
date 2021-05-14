@@ -3,6 +3,7 @@ package br.com.zup.pix.contaPix.registra
 import br.com.zup.pix.ChaveRegistradaResponse
 import br.com.zup.pix.PixServerRegistrarServiceGrpc
 import br.com.zup.pix.RegistrarChaveRequest
+import br.com.zup.pix.contaPix.ChavePix
 import br.com.zup.pix.exception.ChavePixExistenteException
 import br.com.zup.pix.exception.ClienteNaoEncontradoException
 import io.grpc.Status
@@ -20,26 +21,31 @@ class RegistrarChaveEndpoint(@Inject private val service: RegistrarChavePixServi
         val chavePixRequest = request.toModel()
         try {
             val chave = service.registrar(chavePixRequest)
-
-            responseObserver.onNext(ChaveRegistradaResponse
-                .newBuilder()
-                .setPixId(chave.id!!.toString())
-                .setClienteId(chave.clienteId.toString())
-                .build())
-            responseObserver.onCompleted()
+            respostaChaveRegistrada(responseObserver, chave)
         }catch (e: ChavePixExistenteException){
             catchChaveJaCadastrada(responseObserver, chavePixRequest)
-            return
         }catch (e: ClienteNaoEncontradoException){
             catchClienteNaoEncontrado(responseObserver)
-            return
         }catch (e: Exception){
-            argumentosInvalidos(responseObserver)
-            return
+            catchArgumentosInvalidos(responseObserver)
         }
     }
 
-    private fun argumentosInvalidos(responseObserver: StreamObserver<ChaveRegistradaResponse>) {
+    private fun respostaChaveRegistrada(
+        responseObserver: StreamObserver<ChaveRegistradaResponse>,
+        chave: ChavePix
+    ) {
+        responseObserver.onNext(
+            ChaveRegistradaResponse
+                .newBuilder()
+                .setPixId(chave.id!!.toString())
+                .setClienteId(chave.clienteId.toString())
+                .build()
+        )
+        responseObserver.onCompleted()
+    }
+
+    private fun catchArgumentosInvalidos(responseObserver: StreamObserver<ChaveRegistradaResponse>) {
         responseObserver.onError(
             Status.INVALID_ARGUMENT
                 .withDescription("Dados invalidos")

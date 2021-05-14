@@ -25,8 +25,6 @@ class RemoverChavePixService(
         val pixId = UUID.fromString(chavePixRequest.pixId!!)
         val clienteId = UUID.fromString(chavePixRequest.clienteId!!)
 
-        val teste = repository.findById(pixId)
-
         if(!repository.existsById(pixId)){
             throw ChavePixNaoExisteException("Chave Pix não localizada")
         }
