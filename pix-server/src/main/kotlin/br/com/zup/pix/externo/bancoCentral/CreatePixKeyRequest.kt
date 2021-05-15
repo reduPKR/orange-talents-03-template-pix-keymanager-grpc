@@ -4,12 +4,13 @@ import br.com.zup.pix.contaPix.ChavePix
 import br.com.zup.pix.externo.bancoCentral.CreatePixKeyRequest.Companion.converter
 import br.com.zup.pix.externo.itau.ContaAssociada
 
-data class CreatePixKeyRequest(
+class CreatePixKeyRequest(
     val keyType: KeyType,
     val key: String,
     val bankAccount: BankAccountRequest,
     val owner: OwnerRequest
 ) {
+
     companion object{
         fun converter(chave: ChavePix): CreatePixKeyRequest{
             return CreatePixKeyRequest(

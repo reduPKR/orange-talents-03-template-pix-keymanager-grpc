@@ -1,10 +1,15 @@
 package br.com.zup.pix.contaPix.registra
 
-import br.com.zup.pix.*
-import br.com.zup.pix.contaPix.ChavePix
+import br.com.zup.pix.PixServerRegistrarServiceGrpc
+import br.com.zup.pix.RegistrarChaveRequest
+import br.com.zup.pix.TipoChave
+import br.com.zup.pix.TipoConta
 import br.com.zup.pix.contaPix.ChavePixRepository
 import br.com.zup.pix.externo.bancoCentral.*
-import br.com.zup.pix.externo.itau.*
+import br.com.zup.pix.externo.itau.ContaClienteItau
+import br.com.zup.pix.externo.itau.DadosContaResponse
+import br.com.zup.pix.externo.itau.InstituicaoResponse
+import br.com.zup.pix.externo.itau.TitularResponse
 import io.grpc.ManagedChannel
 import io.grpc.Status
 import io.grpc.StatusRuntimeException
@@ -19,17 +24,17 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.mockito.Mockito
+import java.time.LocalDateTime
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @MicronautTest
-internal class RegistrarChaveEndpointTestMock(
+internal class RegistrarChaveEndpointTest(
     val repository: ChavePixRepository,
     val grpcClient: PixServerRegistrarServiceGrpc.PixServerRegistrarServiceBlockingStub
 ) {
     @Inject
     lateinit var itauClient: ContaClienteItau
-
     @Inject
     lateinit var bcCliente: BancoCentralCliente
 
@@ -45,11 +50,9 @@ internal class RegistrarChaveEndpointTestMock(
         val dadosConta = getDadosConta()
         Mockito.`when`(itauClient.buscarContaPorTipo(clienteId, "CONTA_CORRENTE"))
             .thenReturn(HttpResponse.ok(dadosConta))
-        Mockito.`when`(
-            bcCliente.cadastrar(
-                criarRequestBancoCentral(dadosConta)
-            )
-        )
+
+        Mockito.`when`(bcCliente.cadastrar(gerarPixKeyRequest()))
+            .thenReturn(HttpResponse.created(gerarPixKeyResponse()))
 
         val chaveRequest = RegistrarChaveRequest.newBuilder()
             .setClienteId(clienteId)
@@ -66,20 +69,38 @@ internal class RegistrarChaveEndpointTestMock(
         }
     }
 
-    private fun criarRequestBancoCentral(dadosConta: DadosContaResponse): CreatePixKeyRequest {
-        return CreatePixKeyRequest(
+    private fun gerarPixKeyResponse(): CreatePixKeyResponse {
+        return CreatePixKeyResponse(
             KeyType.CPF,
             "02467781054",
             BankAccountRequest(
-                ContaAssociada.ITAU_UNIBANCO_ISPB,
-                dadosConta.agencia,
-                dadosConta.numero,
+                "60701190",
+                "0001",
+                "291900",
                 BankAccountRequest.AccountType.CACC
             ),
             OwnerRequest(
                 OwnerType.NATURAL_PERSON,
-                dadosConta.titular.nome,
-                dadosConta.titular.cpf
+                "Rafael M C Ponte",
+                "02467781054"
+            )
+        )
+    }
+
+    private fun gerarPixKeyRequest(): CreatePixKeyRequest {
+        return CreatePixKeyRequest(
+            KeyType.CPF,
+            "02467781054",
+            BankAccountRequest(
+                "60701190",
+                "0001",
+                "291900",
+                BankAccountRequest.AccountType.CACC
+            ),
+            OwnerRequest(
+                OwnerType.NATURAL_PERSON,
+                "Rafael M C Ponte",
+                "02467781054"
             )
         )
     }
@@ -157,12 +178,12 @@ internal class RegistrarChaveEndpointTestMock(
     }
 
     @MockBean(ContaClienteItau::class)
-    fun itauMock(): ContaClienteItau {
+    fun itauMock(): ContaClienteItau? {
         return Mockito.mock(ContaClienteItau::class.java)
     }
 
     @MockBean(BancoCentralCliente::class)
-    fun bancoCentralMock(): BancoCentralCliente {
+    fun bancoCentralMock(): BancoCentralCliente? {
         return Mockito.mock(BancoCentralCliente::class.java)
     }
 

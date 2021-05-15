@@ -29,8 +29,7 @@ class RegistrarChaveEndpoint(@Inject private val service: RegistrarChavePixServi
             catchClienteNaoEncontrado(responseObserver)
         }catch(e: ErroBancoCentralException){
             catchErroComBancoCentral(responseObserver)
-        }
-        catch (e: Exception){
+        }catch (e: Exception){
             catchArgumentosInvalidos(responseObserver)
         }
     }

@@ -30,8 +30,9 @@ class RemoverChavePixService(
         }
 
         val response = itauClient.buscarCliente(chavePixRequest.clienteId)
-        val cliente = response.body()
-            ?: throw ClienteNaoEncontradoException("Cliente não encontrado")
+
+        if(response.body() == null)
+            throw ClienteNaoEncontradoException("Cliente não encontrado")
 
         if(!repository.existsByIdAndClienteId(pixId,
                clienteId)){
