@@ -69,63 +69,6 @@ internal class RegistrarChaveEndpointTest(
         }
     }
 
-    private fun gerarPixKeyResponse(): CreatePixKeyResponse {
-        return CreatePixKeyResponse(
-            KeyType.CPF,
-            "02467781054",
-            BankAccountRequest(
-                "60701190",
-                "0001",
-                "291900",
-                BankAccountRequest.AccountType.CACC
-            ),
-            OwnerRequest(
-                OwnerType.NATURAL_PERSON,
-                "Rafael M C Ponte",
-                "02467781054"
-            )
-        )
-    }
-
-    private fun gerarPixKeyRequest(): CreatePixKeyRequest {
-        return CreatePixKeyRequest(
-            KeyType.CPF,
-            "02467781054",
-            BankAccountRequest(
-                "60701190",
-                "0001",
-                "291900",
-                BankAccountRequest.AccountType.CACC
-            ),
-            OwnerRequest(
-                OwnerType.NATURAL_PERSON,
-                "Rafael M C Ponte",
-                "02467781054"
-            )
-        )
-    }
-
-    private fun getDadosConta(): DadosContaResponse {
-        val intituica = InstituicaoResponse(
-            "ITAÚ UNIBANCO S.A.",
-            "60701190"
-        )
-
-        val titularResponse = TitularResponse(
-            "c56dfef4-7901-44fb-84e2-a2cefb157890",
-            "Rafael M C Ponte",
-            "02467781054"
-        )
-
-        return DadosContaResponse(
-            "CONTA_CORRENTE",
-            intituica,
-            "0001",
-            "291900",
-            titularResponse
-        )
-    }
-
     @Test
     fun `nao deve cadastrar caso a chave ja foi cadastrada`() {
         val clienteId = "c56dfef4-7901-44fb-84e2-a2cefb157890"
@@ -134,6 +77,9 @@ internal class RegistrarChaveEndpointTest(
         val dadosConta = getDadosConta()
         Mockito.`when`(itauClient.buscarContaPorTipo(clienteId, "CONTA_CORRENTE"))
             .thenReturn(HttpResponse.ok(dadosConta))
+
+        Mockito.`when`(bcCliente.cadastrar(gerarPixKeyRequest()))
+            .thenReturn(HttpResponse.created(gerarPixKeyResponse()))
 
         val chaveRequest = RegistrarChaveRequest.newBuilder()
             .setClienteId(clienteId)
@@ -194,5 +140,62 @@ internal class RegistrarChaveEndpointTest(
                 : PixServerRegistrarServiceGrpc.PixServerRegistrarServiceBlockingStub? {
             return PixServerRegistrarServiceGrpc.newBlockingStub(channel)
         }
+    }
+
+    private fun gerarPixKeyResponse(): CreatePixKeyResponse {
+        return CreatePixKeyResponse(
+            KeyType.CPF,
+            "02467781054",
+            BankAccountRequest(
+                "60701190",
+                "0001",
+                "291900",
+                BankAccountRequest.AccountType.CACC
+            ),
+            OwnerRequest(
+                OwnerType.NATURAL_PERSON,
+                "Rafael M C Ponte",
+                "02467781054"
+            )
+        )
+    }
+
+    private fun gerarPixKeyRequest(): CreatePixKeyRequest {
+        return CreatePixKeyRequest(
+            KeyType.CPF,
+            "02467781054",
+            BankAccountRequest(
+                "60701190",
+                "0001",
+                "291900",
+                BankAccountRequest.AccountType.CACC
+            ),
+            OwnerRequest(
+                OwnerType.NATURAL_PERSON,
+                "Rafael M C Ponte",
+                "02467781054"
+            )
+        )
+    }
+
+    private fun getDadosConta(): DadosContaResponse {
+        val intituica = InstituicaoResponse(
+            "ITAÚ UNIBANCO S.A.",
+            "60701190"
+        )
+
+        val titularResponse = TitularResponse(
+            "c56dfef4-7901-44fb-84e2-a2cefb157890",
+            "Rafael M C Ponte",
+            "02467781054"
+        )
+
+        return DadosContaResponse(
+            "CONTA_CORRENTE",
+            intituica,
+            "0001",
+            "291900",
+            titularResponse
+        )
     }
 }

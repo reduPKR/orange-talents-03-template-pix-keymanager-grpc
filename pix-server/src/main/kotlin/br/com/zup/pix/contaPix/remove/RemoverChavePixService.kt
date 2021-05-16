@@ -1,15 +1,16 @@
 package br.com.zup.pix.contaPix.remove
 
 import br.com.zup.pix.contaPix.ChavePixRepository
-import br.com.zup.pix.exception.ChavePixNaoExisteException
-import br.com.zup.pix.exception.ChavePixNaoPertenceAoCliente
-import br.com.zup.pix.exception.ClienteNaoEncontradoException
-import br.com.zup.pix.exception.ErroAoRetornarChavePixException
+import br.com.zup.pix.exception.*
+import br.com.zup.pix.externo.bancoCentral.BancoCentralCliente
+import br.com.zup.pix.externo.bancoCentral.DeletePixKeyRequest
 import br.com.zup.pix.externo.itau.ContaClienteItau
+import io.micronaut.http.HttpStatus
 import io.micronaut.validation.Validated
 import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
+import javax.transaction.Status
 import javax.transaction.Transactional
 import javax.validation.Valid
 
@@ -17,7 +18,8 @@ import javax.validation.Valid
 @Validated
 class RemoverChavePixService(
     @Inject val repository: ChavePixRepository,
-    @Inject val itauClient: ContaClienteItau
+    @Inject val itauClient: ContaClienteItau,
+    @Inject val bcCliente: BancoCentralCliente
 ) {
 
     @Transactional
@@ -39,11 +41,17 @@ class RemoverChavePixService(
             throw ChavePixNaoPertenceAoCliente("Chave Pix não pertence ao cliente informado")
         }
 
-        val chavePix = repository.findByIdAndClienteId(pixId, clienteId)
-        if(chavePix.isEmpty)
+        val optional = repository.findByIdAndClienteId(pixId, clienteId)
+        if(optional.isEmpty)
             throw ErroAoRetornarChavePixException("Erro ao tentar remover a chave")
 
-        repository.delete(chavePix.get())
+        val chavePix = optional.get()
+        repository.delete(chavePix)
+
+        val request = DeletePixKeyRequest(chavePix.chave)
+        val bcResponse = bcCliente.remover(chavePix.chave, request)
+        if (bcResponse.status != HttpStatus.OK)
+            throw ErroAoRemoverChavePixBancoCentral()
     }
 
 }

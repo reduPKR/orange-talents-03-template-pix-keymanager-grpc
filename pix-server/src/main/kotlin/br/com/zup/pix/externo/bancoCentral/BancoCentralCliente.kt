@@ -14,5 +14,6 @@ interface BancoCentralCliente {
 
     @Delete("/api/v1/pix/keys/{key}")
     @Consumes(MediaType.APPLICATION_XML)
-    fun remover(@PathVariable key: String): HttpResponse<PixKeyDetailsResponse>
+    @Produces(MediaType.APPLICATION_XML)
+    fun remover(@PathVariable key: String, @Body request: DeletePixKeyRequest): HttpResponse<DeletePixKeyResponse>
 }
