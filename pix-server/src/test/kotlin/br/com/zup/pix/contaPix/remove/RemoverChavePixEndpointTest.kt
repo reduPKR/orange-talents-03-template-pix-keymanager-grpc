@@ -5,6 +5,8 @@ import br.com.zup.pix.contaPix.ChavePix
 import br.com.zup.pix.contaPix.ChavePixRepository
 import br.com.zup.pix.contaPix.TipoChave
 import br.com.zup.pix.contaPix.TipoConta
+import br.com.zup.pix.externo.bancoCentral.BancoCentralCliente
+import br.com.zup.pix.externo.bancoCentral.DeletePixKeyRequest
 import br.com.zup.pix.externo.itau.ContaAssociada
 import br.com.zup.pix.externo.itau.ContaClienteItau
 import br.com.zup.pix.externo.itau.DadosClienteResponse
@@ -16,6 +18,7 @@ import io.micronaut.context.annotation.Factory
 import io.micronaut.grpc.annotation.GrpcChannel
 import io.micronaut.grpc.server.GrpcServerChannel
 import io.micronaut.http.HttpResponse
+import io.micronaut.http.HttpStatus
 import io.micronaut.test.annotation.MockBean
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest
 import org.junit.jupiter.api.*
@@ -32,9 +35,13 @@ internal class RemoverChavePixEndpointTest(
 ) {
     @Inject
     lateinit var itauClient: ContaClienteItau
+    @Inject
+    lateinit var bcCliente: BancoCentralCliente
+
     lateinit var chavePixId: String
     val clienteId = "c56dfef4-7901-44fb-84e2-a2cefb157890"
     val clienteId2 = "5260263c-a3c1-4727-ae32-3bdb2538841b"
+    val chavePrincipal = "rafael@email.com"
 
     @BeforeEach
     fun setUp() {
@@ -42,7 +49,7 @@ internal class RemoverChavePixEndpointTest(
         val chave = ChavePix(
             UUID.fromString(clienteId),
             TipoChave.EMAIL,
-            "rafael@email.com",
+            chavePrincipal,
             TipoConta.CONTA_CORRENTE,
             ContaAssociada(
                 "ITAÚ UNIBANCO S.A.",
@@ -62,11 +69,13 @@ internal class RemoverChavePixEndpointTest(
         Mockito.`when`(itauClient.buscarCliente(clienteId))
             .thenReturn(HttpResponse.ok(dadosCliente))
 
+        Mockito.`when`(bcCliente.remover(chavePrincipal, DeletePixKeyRequest(chavePrincipal)))
+            .thenReturn(HttpResponse.ok())
+
         val chavePixRequest = RemoverChaveRequest.newBuilder()
             .setPixId(chavePixId)
             .setClienteId(clienteId)
             .build()
-
 
         val response = grpcClient.remover(chavePixRequest)
 
@@ -75,7 +84,55 @@ internal class RemoverChavePixEndpointTest(
     }
 
     @Test
-    fun `não deve inserir caso o pixId nao foi localizado`() {
+    fun `nao deve remover uma chave pix se o banco central responder not found`() {
+        val dadosCliente = getDadosCliente()
+        Mockito.`when`(itauClient.buscarCliente(clienteId))
+            .thenReturn(HttpResponse.ok(dadosCliente))
+
+        Mockito.`when`(bcCliente.remover(chavePrincipal, DeletePixKeyRequest(chavePrincipal)))
+            .thenReturn(HttpResponse.notFound())
+
+        val chavePixRequest = RemoverChaveRequest.newBuilder()
+            .setPixId(chavePixId)
+            .setClienteId(clienteId)
+            .build()
+
+        val error = assertThrows<StatusRuntimeException>{
+            grpcClient.remover(chavePixRequest)
+        }
+
+        with(error){
+            assertEquals(Status.NOT_FOUND.code, status.code)
+            assertEquals("PIX não localizado no sistema", status.description)
+        }
+    }
+
+    @Test
+    fun `nao deve remover uma chave pix se o banco central responder forbidden`() {
+        val dadosCliente = getDadosCliente()
+        Mockito.`when`(itauClient.buscarCliente(clienteId))
+            .thenReturn(HttpResponse.ok(dadosCliente))
+
+        Mockito.`when`(bcCliente.remover(chavePrincipal, DeletePixKeyRequest(chavePrincipal)))
+            .thenReturn(HttpResponse.status(HttpStatus.FORBIDDEN))
+
+        val chavePixRequest = RemoverChaveRequest.newBuilder()
+            .setPixId(chavePixId)
+            .setClienteId(clienteId)
+            .build()
+
+        val error = assertThrows<StatusRuntimeException>{
+            grpcClient.remover(chavePixRequest)
+        }
+
+        with(error){
+            assertEquals(Status.fromCodeValue(403).code, status.code)
+            assertEquals("Servidor não autorizou a ação", status.description)
+        }
+    }
+
+    @Test
+    fun `não deve remover caso o pixId nao foi localizado`() {
         val chavePixRequest = RemoverChaveRequest.newBuilder()
             .setPixId(UUID.randomUUID().toString())
             .setClienteId(clienteId)
@@ -92,7 +149,7 @@ internal class RemoverChavePixEndpointTest(
     }
 
     @Test
-    fun `não deve inserir caso o cliente não seja localizado`() {
+    fun `não deve remover caso o cliente não seja localizado`() {
         val chavePixRequest = RemoverChaveRequest.newBuilder()
             .setPixId(chavePixId)
             .setClienteId(UUID.randomUUID().toString())
@@ -109,7 +166,7 @@ internal class RemoverChavePixEndpointTest(
     }
 
     @Test
-    fun `não deve inserir caso o pix nao pertenca ao cliente`() {
+    fun `não deve remover caso o pix nao pertenca ao cliente`() {
         val chavePixRequest = RemoverChaveRequest.newBuilder()
             .setPixId(chavePixId)
             .setClienteId(clienteId2)
@@ -156,7 +213,6 @@ internal class RemoverChavePixEndpointTest(
         }
     }
 
-
     private fun getDadosCliente(): DadosClienteResponse {
         return DadosClienteResponse(
             "c56dfef4-7901-44fb-84e2-a2cefb157890",
@@ -172,6 +228,11 @@ internal class RemoverChavePixEndpointTest(
     @MockBean(ContaClienteItau::class)
     fun itauMock(): ContaClienteItau {
         return Mockito.mock(ContaClienteItau::class.java)
+    }
+
+    @MockBean(BancoCentralCliente::class)
+    fun bancoCentralMock(): BancoCentralCliente{
+        return Mockito.mock(BancoCentralCliente::class.java)
     }
 
     @Factory

@@ -156,7 +156,8 @@ internal class RegistrarChaveEndpointTest(
                 OwnerType.NATURAL_PERSON,
                 "Rafael M C Ponte",
                 "02467781054"
-            )
+            ),
+            LocalDateTime.now()
         )
     }
 

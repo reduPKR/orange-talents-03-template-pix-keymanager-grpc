@@ -1,14 +1,10 @@
 package br.com.zup.pix.contaPix.remove
 
-import br.com.zup.pix.ChaveRegistradaResponse
 import br.com.zup.pix.PixServerRemoveServiceGrpc
 import br.com.zup.pix.RemoverChaveRequest
 import br.com.zup.pix.RemoverChaveResponse
 import br.com.zup.pix.contaPix.registra.toModel
-import br.com.zup.pix.exception.ChavePixNaoExisteException
-import br.com.zup.pix.exception.ChavePixNaoPertenceAoCliente
-import br.com.zup.pix.exception.ClienteNaoEncontradoException
-import br.com.zup.pix.exception.ErroAoRetornarChavePixException
+import br.com.zup.pix.exception.*
 import io.grpc.Status
 import io.grpc.stub.StreamObserver
 import javax.inject.Inject
@@ -34,6 +30,10 @@ class RemoverChavePixEndpoint(@Inject private val service: RemoverChavePixServic
             catchContaPixNaoPertenceAoCliente(responseObserver)
         }catch (e: ErroAoRetornarChavePixException){
             catchErroNoServidor(responseObserver)
+        }catch (e: ErroAoRemoverChavePixBancoCentralNotFound){
+            catchChavePixBancoCentralNotFound(responseObserver)
+        }catch (e: ErroAoRemoverChavePixBancoCentralForbidden){
+            catchChavePixBancoCentralFobirdden(responseObserver)
         } catch (e: Exception){
             catchArgumentoInvalido(responseObserver)
         }
@@ -50,6 +50,22 @@ class RemoverChavePixEndpoint(@Inject private val service: RemoverChavePixServic
                 .build()
         )
         responseObserver.onCompleted()
+    }
+
+    private fun catchChavePixBancoCentralNotFound(responseObserver: StreamObserver<RemoverChaveResponse>) {
+        responseObserver.onError(
+            Status.NOT_FOUND
+                .withDescription("PIX não localizado no sistema")
+                .asRuntimeException()
+        )
+    }
+
+    private fun catchChavePixBancoCentralFobirdden(responseObserver: StreamObserver<RemoverChaveResponse>) {
+        responseObserver.onError(
+            Status.fromCodeValue(403)
+                .withDescription("Servidor não autorizou a ação")
+                .asRuntimeException()
+        )
     }
 
     private fun catchErroNoServidor(responseObserver: StreamObserver<RemoverChaveResponse>) {

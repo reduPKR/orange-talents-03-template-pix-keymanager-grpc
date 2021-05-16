@@ -10,7 +10,6 @@ import io.micronaut.validation.Validated
 import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
-import javax.transaction.Status
 import javax.transaction.Transactional
 import javax.validation.Valid
 
@@ -50,6 +49,13 @@ class RemoverChavePixService(
 
         val request = DeletePixKeyRequest(chavePix.chave)
         val bcResponse = bcCliente.remover(chavePix.chave, request)
+
+        if (bcResponse.status == HttpStatus.NOT_FOUND)
+            throw ErroAoRemoverChavePixBancoCentralNotFound()
+
+        if (bcResponse.status != HttpStatus.FORBIDDEN)
+            throw ErroAoRemoverChavePixBancoCentralForbidden()
+
         if (bcResponse.status != HttpStatus.OK)
             throw ErroAoRemoverChavePixBancoCentral()
     }
