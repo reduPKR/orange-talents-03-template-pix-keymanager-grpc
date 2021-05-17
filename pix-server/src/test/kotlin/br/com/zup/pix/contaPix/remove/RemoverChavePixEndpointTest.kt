@@ -1,12 +1,14 @@
 package br.com.zup.pix.contaPix.remove
 
-import br.com.zup.pix.*
+import br.com.zup.pix.PixServerRemoveServiceGrpc
+import br.com.zup.pix.RemoverChaveRequest
 import br.com.zup.pix.contaPix.ChavePix
 import br.com.zup.pix.contaPix.ChavePixRepository
 import br.com.zup.pix.contaPix.TipoChave
 import br.com.zup.pix.contaPix.TipoConta
 import br.com.zup.pix.externo.bancoCentral.BancoCentralCliente
 import br.com.zup.pix.externo.bancoCentral.DeletePixKeyRequest
+import br.com.zup.pix.externo.bancoCentral.DeletePixKeyResponse
 import br.com.zup.pix.externo.itau.ContaAssociada
 import br.com.zup.pix.externo.itau.ContaClienteItau
 import br.com.zup.pix.externo.itau.DadosClienteResponse
@@ -21,9 +23,12 @@ import io.micronaut.http.HttpResponse
 import io.micronaut.http.HttpStatus
 import io.micronaut.test.annotation.MockBean
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest
-import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.mockito.Mockito
+import org.mockito.Mockito.doReturn
 import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -69,8 +74,11 @@ internal class RemoverChavePixEndpointTest(
         Mockito.`when`(itauClient.buscarCliente(clienteId))
             .thenReturn(HttpResponse.ok(dadosCliente))
 
-        Mockito.`when`(bcCliente.remover(chavePrincipal, DeletePixKeyRequest(chavePrincipal)))
-            .thenReturn(HttpResponse.ok())
+//        Mockito.`when`(bcCliente.remover(chavePrincipal, DeletePixKeyRequest(chavePrincipal)))
+//            .thenReturn(HttpResponse.ok())
+            //doReturn(HttpResponse.ok()).when(bcClientMock).remover(...)
+        doReturn(HttpResponse.ok(DeletePixKeyResponse()))
+            .`when`(bcCliente).remover(chavePrincipal, DeletePixKeyRequest(chavePrincipal))
 
         val chavePixRequest = RemoverChaveRequest.newBuilder()
             .setPixId(chavePixId)
@@ -89,8 +97,11 @@ internal class RemoverChavePixEndpointTest(
         Mockito.`when`(itauClient.buscarCliente(clienteId))
             .thenReturn(HttpResponse.ok(dadosCliente))
 
-        Mockito.`when`(bcCliente.remover(chavePrincipal, DeletePixKeyRequest(chavePrincipal)))
-            .thenReturn(HttpResponse.notFound())
+//        Mockito.`when`(bcCliente.remover(chavePrincipal, DeletePixKeyRequest(chavePrincipal)))
+//            .thenReturn(HttpResponse.notFound())
+
+        doReturn(HttpResponse.notFound(DeletePixKeyResponse()))
+            .`when`(bcCliente).remover(chavePrincipal, DeletePixKeyRequest(chavePrincipal))
 
         val chavePixRequest = RemoverChaveRequest.newBuilder()
             .setPixId(chavePixId)
@@ -113,8 +124,10 @@ internal class RemoverChavePixEndpointTest(
         Mockito.`when`(itauClient.buscarCliente(clienteId))
             .thenReturn(HttpResponse.ok(dadosCliente))
 
-        Mockito.`when`(bcCliente.remover(chavePrincipal, DeletePixKeyRequest(chavePrincipal)))
-            .thenReturn(HttpResponse.status(HttpStatus.FORBIDDEN))
+//        Mockito.`when`(bcCliente.remover(chavePrincipal, DeletePixKeyRequest(chavePrincipal)))
+//            .thenReturn(HttpResponse.status(HttpStatus.FORBIDDEN))
+        doReturn(HttpResponse.status<DeletePixKeyResponse>(HttpStatus.FORBIDDEN))
+            .`when`(bcCliente).remover(chavePrincipal, DeletePixKeyRequest(chavePrincipal))
 
         val chavePixRequest = RemoverChaveRequest.newBuilder()
             .setPixId(chavePixId)
