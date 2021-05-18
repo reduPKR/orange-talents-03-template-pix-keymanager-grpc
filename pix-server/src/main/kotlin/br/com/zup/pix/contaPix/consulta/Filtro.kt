@@ -3,6 +3,8 @@ package br.com.zup.pix.contaPix.consulta
 import br.com.zup.pix.validador.ValidUUID
 import br.com.zup.pix.contaPix.ChavePixRepository
 import br.com.zup.pix.exception.ChavePixNaoExisteException
+import br.com.zup.pix.exception.ChavePixNaoPertenceAoCliente
+import br.com.zup.pix.exception.ClienteNaoEncontradoException
 import br.com.zup.pix.externo.bancoCentral.BancoCentralCliente
 import io.micronaut.core.annotation.Introspected
 import io.micronaut.http.HttpStatus
@@ -27,7 +29,19 @@ sealed class Filtro {
             return repository
                 .findByIdAndClienteId(pixUUID, clienteUUID)
                 .map(ChavePixInfo::converter)
-                .orElseThrow{ChavePixNaoExisteException("Chave pix não encontrada")}
+                .orElseThrow{
+                    when {
+                        !repository.existsById(pixUUID) -> {
+                            ChavePixNaoExisteException("Pix id não encontrada")
+                        }
+                        !repository.existsByClienteId(clienteUUID) -> {
+                            ClienteNaoEncontradoException("Cliente não encontrado")
+                        }
+                        else -> {
+                            ChavePixNaoPertenceAoCliente("Chave não pertence ao cliente")
+                        }
+                    }
+                }
         }
     }
 

@@ -8,6 +8,8 @@ import br.com.zup.pix.contaPix.TipoConta
 import br.com.zup.pix.externo.bancoCentral.BancoCentralCliente
 import br.com.zup.pix.externo.itau.ContaAssociada
 import io.grpc.ManagedChannel
+import io.grpc.Status
+import io.grpc.StatusRuntimeException
 import io.micronaut.context.annotation.Factory
 import io.micronaut.grpc.annotation.GrpcChannel
 import io.micronaut.grpc.server.GrpcServerChannel
@@ -16,6 +18,7 @@ import io.micronaut.test.extensions.junit5.annotation.MicronautTest
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.mockito.Mockito
 import java.util.*
 import javax.inject.Inject
@@ -110,19 +113,100 @@ internal class ConsultaChaveEndpointTest(
     }
 
     @Test
-    fun `nao deve retornar dados da consulta pelo pixId se o clientId nao for encontrado`(){}
+    fun `nao deve retornar dados da consulta pelo pixId se o clientId nao for encontrado`(){
+        val chaveRequest = ConsultarChavePixRequest.newBuilder()
+            .setPixId(
+                ConsultarChavePixRequest.FiltroPorPixId.newBuilder()
+                    .setClienteId("11111111-1111-1111-1111-111111111111")
+                    .setPixId(chavePix1.id.toString())
+                    .build()
+            ).build()
+
+        val error = assertThrows<StatusRuntimeException> {
+            grpcClient.consultar(chaveRequest)
+        }
+
+        with(error){
+            assertEquals(Status.NOT_FOUND.code, status.code)
+            assertEquals("Cliente não foi encontrado", status.description)
+        }
+    }
 
     @Test
-    fun `nao deve retornar dados da consulta pelo pixId se o pixId nao for encontrado`(){}
+    fun `nao deve retornar dados da consulta pelo pixId se o pixId nao for encontrado`(){
+        val chaveRequest = ConsultarChavePixRequest.newBuilder()
+            .setPixId(
+                ConsultarChavePixRequest.FiltroPorPixId.newBuilder()
+                    .setClienteId(chavePix3.clienteId.toString())
+                    .setPixId("11111111-1111-1111-1111-111111111111")
+                    .build()
+            ).build()
+
+        val error = assertThrows<StatusRuntimeException> {
+            grpcClient.consultar(chaveRequest)
+        }
+
+        with(error){
+            assertEquals(Status.NOT_FOUND.code, status.code)
+            assertEquals("Chave PIX não foi encontrada", status.description)
+        }
+    }
 
     @Test
-    fun `nao deve retornar dados da consulta pelo pixId se o clientId e o pixId nao forem da mesma chave`(){}
+    fun `nao deve retornar dados da consulta pelo pixId se o clientId e o pixId nao forem da mesma chave`(){
+        val chaveRequest = ConsultarChavePixRequest.newBuilder()
+            .setPixId(
+                ConsultarChavePixRequest.FiltroPorPixId.newBuilder()
+                    .setClienteId(chavePix1.clienteId.toString())
+                    .setPixId(chavePix2.id.toString())
+                    .build()
+            ).build()
+
+        val error = assertThrows<StatusRuntimeException> {
+            grpcClient.consultar(chaveRequest)
+        }
+
+        with(error){
+            assertEquals(Status.PERMISSION_DENIED.code, status.code)
+            assertEquals("Chave PIX não pertence ao cliente", status.description)
+        }
+    }
 
     @Test
-    fun `deve retornar dados na consulta pela chave`(){}
+    fun `deve retornar dados na consulta pela chave`(){
+        val chaveRequest = ConsultarChavePixRequest.newBuilder()
+            .setChave(chavePix2.chave)
+            .build()
+
+        val retorno = grpcClient.consultar(chaveRequest)
+
+        assertEquals(chavePix2.clienteId.toString(), retorno.clienteId)
+        assertEquals(chavePix2.id.toString(), retorno.pixId)
+        assertEquals(br.com.zup.pix.TipoChave.CPF, retorno.chave.tipoChave)
+        assertEquals(chavePix2.chave, retorno.chave.chave)
+        assertEquals(br.com.zup.pix.TipoConta.CONTA_POUPANCA, retorno.chave.conta.tipoConta)
+        assertEquals(chavePix2.conta.instuicao, retorno.chave.conta.instituicao)
+        assertEquals(chavePix2.conta.nomeTitular, retorno.chave.conta.nomeTitular)
+        assertEquals(chavePix2.conta.cpfTitular, retorno.chave.conta.cpfTitular)
+        assertEquals(chavePix2.conta.agencia, retorno.chave.conta.agencia)
+        assertEquals(chavePix2.conta.numeroConta, retorno.chave.conta.numeroConta)
+    }
 
     @Test
-    fun `não deve retornar dados na consulta pela chave`(){}
+    fun `não deve retornar dados na consulta pela chave`(){
+        val chaveRequest = ConsultarChavePixRequest.newBuilder()
+            .setChave("11111111-1111-1111-1111-111111111111")
+            .build()
+
+        val error = assertThrows<StatusRuntimeException> {
+            grpcClient.consultar(chaveRequest)
+        }
+
+        with(error){
+            assertEquals(Status.NOT_FOUND.code, status.code)
+            assertEquals("Chave PIX não foi encontrada", status.description)
+        }
+    }
 
     @MockBean(BancoCentralCliente::class)
     fun bancoCentralMock(): BancoCentralCliente?{
