@@ -1,10 +1,13 @@
 package br.com.zup.pix.contaPix.registra
 
+
 import br.com.zup.pix.ConsultarChavePixRequest
+import br.com.zup.pix.ConsultarChavePixRequest.FiltroCase.*
 import br.com.zup.pix.RegistrarChaveRequest
 import br.com.zup.pix.RemoverChaveRequest
 import br.com.zup.pix.contaPix.TipoChave
 import br.com.zup.pix.contaPix.TipoConta
+import br.com.zup.pix.contaPix.consulta.Filtro
 import br.com.zup.pix.contaPix.remove.RemoverChavePixRequest
 import io.micronaut.validation.validator.Validator
 import javax.validation.ConstraintViolationException
@@ -24,10 +27,8 @@ fun RemoverChaveRequest.toModel(): RemoverChavePixRequest {
 
 fun ConsultarChavePixRequest.toModel(validator: Validator): Filtro {
     val filtro = when(filtroCase){
-        PIXID -> let {
-            Filtro.PorPixId(it.clienteId, it.pixId)
-        }
-        CHAVE -> Filtro.PorChave(chave)
+        PIXID -> Filtro.porPixId(pixId.clienteId, pixId.pixId)
+        CHAVE -> Filtro.porChave(chave)
         FILTRO_NOT_SET -> Filtro.invalido()
     }
 

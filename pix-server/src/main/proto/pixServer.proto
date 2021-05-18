@@ -70,7 +70,7 @@ message ConsultarChavePixRequest{
 }
 
 message ConsultarChavePixResponse{
-  message chavePix{
+  message ChavePix{
     message ContaInfo{
       TipoConta tipoConta = 1;
       string instituicao = 2;
@@ -87,5 +87,5 @@ message ConsultarChavePixResponse{
 
   string clienteId = 1;
   string pixId = 2;
-  chavePix chave = 3;
+  ChavePix chave = 3;
 }

@@ -1,7 +1,7 @@
 package br.com.zup.pix.contaPix
 
-import br.com.zup.pix.compartilhado.ValidadorCPF
-import br.com.zup.pix.compartilhado.ValidadorEmail
+import br.com.zup.pix.validador.ValidadorCPF
+import br.com.zup.pix.validador.ValidadorEmail
 
 enum class TipoChave {
     UNKNOWN_CHAVE{

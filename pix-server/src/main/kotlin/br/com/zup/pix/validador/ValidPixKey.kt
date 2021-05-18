@@ -1,4 +1,4 @@
-package br.com.zup.pix.compartilhado
+package br.com.zup.pix.validador
 
 import br.com.zup.pix.contaPix.registra.RegistrarChavePixRequest
 import io.micronaut.core.annotation.AnnotationValue

@@ -1,7 +1,7 @@
 package br.com.zup.pix.contaPix.registra
 
-import br.com.zup.pix.compartilhado.ValidPixKey
-import br.com.zup.pix.compartilhado.ValideUUID
+import br.com.zup.pix.validador.ValidPixKey
+import br.com.zup.pix.validador.ValidUUID
 import br.com.zup.pix.contaPix.ChavePix
 import br.com.zup.pix.contaPix.TipoChave
 import br.com.zup.pix.contaPix.TipoConta
@@ -15,7 +15,7 @@ import javax.validation.constraints.Size
 @ValidPixKey
 @Introspected
 class RegistrarChavePixRequest(
-    @ValideUUID
+    @ValidUUID
     @field:NotBlank
     val clienteId: String?,
     @field:NotNull

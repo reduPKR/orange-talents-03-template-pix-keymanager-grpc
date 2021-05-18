@@ -1,15 +1,15 @@
 package br.com.zup.pix.contaPix.remove
 
-import br.com.zup.pix.compartilhado.ValideUUID
+import br.com.zup.pix.validador.ValidUUID
 import io.micronaut.core.annotation.Introspected
 import javax.validation.constraints.NotBlank
 
 @Introspected
 class RemoverChavePixRequest(
-    @ValideUUID
+    @ValidUUID
     @field:NotBlank
     val clienteId: String?,
-    @ValideUUID
+    @ValidUUID
     @field:NotBlank
     val pixId: String?,
 ) {

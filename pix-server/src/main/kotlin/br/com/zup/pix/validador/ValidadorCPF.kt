@@ -1,4 +1,4 @@
-package br.com.zup.pix.compartilhado
+package br.com.zup.pix.validador
 
 class ValidadorCPF(val chave: String) {
     fun validar(): Boolean {
