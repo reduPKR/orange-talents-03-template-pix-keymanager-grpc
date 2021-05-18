@@ -22,5 +22,9 @@ class ConsultaChaveEndpoint(
         responseObserver: StreamObserver<ConsultarChavePixResponse>
     ) {
         val filtro = request.toModel(validator)
+        val chaveResponse = filtro.filtrar(repository, bcCliente)
+
+        responseObserver.onNext(ConsultarChavePixConverter().converter(chaveResponse))
+        responseObserver.onCompleted()
     }
 }
