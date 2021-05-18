@@ -6,6 +6,7 @@ import br.com.zup.pix.PixServerConsultarServiceGrpc
 import br.com.zup.pix.contaPix.ChavePixRepository
 import br.com.zup.pix.contaPix.registra.toModel
 import br.com.zup.pix.externo.bancoCentral.BancoCentralCliente
+import io.grpc.Status
 import io.grpc.stub.StreamObserver
 import io.micronaut.validation.validator.Validator
 import javax.inject.Inject
@@ -22,9 +23,18 @@ class ConsultaChaveEndpoint(
         responseObserver: StreamObserver<ConsultarChavePixResponse>
     ) {
         val filtro = request.toModel(validator)
-        val chaveResponse = filtro.filtrar(repository, bcCliente)
 
-        responseObserver.onNext(ConsultarChavePixConverter().converter(chaveResponse))
-        responseObserver.onCompleted()
+        try{
+            val chaveResponse = filtro.filtrar(repository, bcCliente)
+            responseObserver.onNext(ConsultarChavePixConverter().converter(chaveResponse))
+            responseObserver.onCompleted()
+        }catch (e: Exception){
+            responseObserver.onError(
+                Status.NOT_FOUND
+                    .withDescription("Chave PIX não foi encontrada")
+                    .asRuntimeException()
+            )
+        }
+
     }
 }
