@@ -29,9 +29,6 @@ internal class ConsultaChaveEndpointTest(
     val repository: ChavePixRepository,
     val grpcClient: PixServerConsultarServiceGrpc.PixServerConsultarServiceBlockingStub
 ){
-    @Inject
-    lateinit var bcCliente: BancoCentralCliente
-
     lateinit var chavePix1: ChavePix
     lateinit var chavePix2: ChavePix
     lateinit var chavePix3: ChavePix

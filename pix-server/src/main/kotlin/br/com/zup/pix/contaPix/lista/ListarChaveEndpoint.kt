@@ -3,6 +3,7 @@ package br.com.zup.pix.contaPix.lista
 import br.com.zup.pix.*
 import br.com.zup.pix.contaPix.ChavePixRepository
 import com.google.protobuf.Timestamp
+import io.grpc.Status
 import io.grpc.stub.StreamObserver
 import java.time.ZoneId
 import java.util.*
@@ -17,8 +18,13 @@ class ListarChaveEndpoint(
         request: ListarChavePixRequest,
         responseObserver: StreamObserver<ListarChavePixResponse>
     ) {
-        if(request.clienteId.isNullOrBlank())
-            throw IllegalArgumentException("Chave não pode ser nula ou vazia")
+        if(request.clienteId.isNullOrBlank()) {
+            responseObserver.onError(
+                Status.INVALID_ARGUMENT
+                    .withDescription("Nenhum cliente informado")
+                    .asRuntimeException()
+            )
+        }
 
         val clienteUUID = UUID.fromString(request.clienteId)
         val lista = repository.findAllByClienteId(clienteUUID).map {
