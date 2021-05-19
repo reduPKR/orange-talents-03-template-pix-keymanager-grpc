@@ -1,13 +1,9 @@
 package br.com.zup.pix.contaPix.lista
 
-import br.com.zup.pix.ListarChavePixRequest
-import br.com.zup.pix.ListarChavePixResponse
-import br.com.zup.pix.PixServerListarServiceGrpc
-import br.com.zup.pix.TipoChave
+import br.com.zup.pix.*
 import br.com.zup.pix.contaPix.ChavePixRepository
 import com.google.protobuf.Timestamp
 import io.grpc.stub.StreamObserver
-import java.lang.IllegalArgumentException
 import java.time.ZoneId
 import java.util.*
 import javax.inject.Inject
@@ -30,6 +26,7 @@ class ListarChaveEndpoint(
                 .setPixId(it.id.toString())
                 .setTipoChave(TipoChave.valueOf(it.tipoChave.name))
                 .setChave(it.chave)
+                .setTipoConta(TipoConta.valueOf(it.tipoConta.name))
                 .setCriadoEm(it.criadaEm.let {
                     val criadoEm = it.atZone(ZoneId.of("UTC")).toInstant()
                     Timestamp.newBuilder()
