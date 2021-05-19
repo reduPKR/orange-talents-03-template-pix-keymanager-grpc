@@ -21,6 +21,10 @@ service PixServerConsultarService{
   rpc consultar(ConsultarChavePixRequest) returns (ConsultarChavePixResponse){}
 }
 
+service PixServerListarService{
+  rpc listar(ListarChavePixRequest) returns (ListarChavePixResponse){}
+}
+
 message RemoverChaveRequest{
   string clienteId = 1;
   string pixId = 2;
@@ -88,4 +92,21 @@ message ConsultarChavePixResponse{
   string clienteId = 1;
   string pixId = 2;
   ChavePix chave = 3;
+}
+
+message ListarChavePixRequest{
+  string clienteId = 1;
+}
+
+message ListarChavePixResponse{
+  message ChavePix{
+    string pixId = 1;
+    TipoChave tipoChave = 2;
+    string chave = 3;
+    TipoConta tipoConta = 4;
+    google.protobuf.Timestamp criadoEm = 5;
+  }
+
+  string clienteId = 1;
+  repeated ChavePix listaChaves = 2;
 }
