@@ -53,7 +53,7 @@ class RemoverChavePixService(
         if (bcResponse.status == HttpStatus.NOT_FOUND)
             throw ErroAoRemoverChavePixBancoCentralNotFound()
 
-        if (bcResponse.status != HttpStatus.FORBIDDEN)
+        if (bcResponse.status == HttpStatus.FORBIDDEN)
             throw ErroAoRemoverChavePixBancoCentralForbidden()
 
         if (bcResponse.status != HttpStatus.OK)
